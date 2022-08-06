@@ -7,8 +7,6 @@ from tkinter import Scrollbar
 
 from convert import convert
 
-
-
 class MyApp():
     def __init__(self) -> None:
         self.root = tk.Tk()
@@ -16,16 +14,25 @@ class MyApp():
         self.root.resizable(False, False)
         self.root.geometry('500x200')
         self.root.eval('tk::PlaceWindow . center')
+        self.frame = ttk.Frame(self.root)
         self.open_button = ttk.Button(
-            self.root,
+            self.frame,
             text='Выбрать файлы',
             command=self.select_file
+        )
+        self.help_button = ttk.Button(
+            self.frame,
+            text='?',
+            width=3,
+            command=self.help
         )
         h=Scrollbar(self.root, orient='horizontal')
         h.pack(side=tk.BOTTOM, fill='x')
 
         self.text = ScrolledText(wrap = tk.NONE, xscrollcommand = h.set)
-        self.open_button.pack()
+        self.frame.pack()
+        self.open_button.pack(side = tk.LEFT)
+        self.help_button.pack(side = tk.RIGHT)
         self.text.pack(pady = 5, padx = 5)
         h.config(command = self.text.xview)
         self.root.mainloop()
@@ -36,6 +43,10 @@ class MyApp():
         if len(filenames) == 0: return
         self.start(filenames)
 
+    def help(self):
+        message='Конвертер xml файлов в формате KDT в xnc шаблон Giblab. \nАвтор: Тахмазов Борис'
+        tk.messagebox.showinfo(title='О программе', message=message)
+
     def start(self, filenames):
         self.text.delete("1.0","end")
         for filename in filenames:
@@ -44,10 +55,10 @@ class MyApp():
                 self.text.insert(tk.INSERT,os.path.basename(filename)+' - неправильный формат файла\n')
                 #print(f'{filename} - неправильный формат файла')
                 continue
-            file = filename.split(sep='.')[0]
+            file = os.path.splitext(filename)[0]
             with open(file + '.xnc', 'w') as f:
                 f.write(s)
-            self.text.insert(tk.INSERT,os.path.basename(filename)+' - готово\n')
+            self.text.insert(tk.INSERT,os.path.basename(file)+'.xnc - готово\n')
             #print(f'{filename} - готово')
 
 MyApp()

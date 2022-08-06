@@ -7,25 +7,15 @@ from tkinter import Scrollbar
 
 from convert import convert
 
-def start(filenames):
-    for filename in filenames:
-        if filename.endswith('.xml'):
-            s = convert(filename)
-            if s == "":
-                print(f'{filename} - неправильный формат файла')
-                continue
-            file = filename.split(sep='.')[0]
-            with open(file + '.xnc', 'w') as f:
-                f.write(s)
-            print(f'{filename} - готово')
-    input('Нажмите любую клавишу...')
+
 
 class MyApp():
     def __init__(self) -> None:
         self.root = tk.Tk()
         self.root.title('KDT конвертер')
         self.root.resizable(False, False)
-        self.root.geometry('300x150')
+        self.root.geometry('500x200')
+        self.root.eval('tk::PlaceWindow . center')
         self.open_button = ttk.Button(
             self.root,
             text='Выбрать файлы',
@@ -41,17 +31,23 @@ class MyApp():
         self.root.mainloop()
 
     def select_file(self):
-        filetypes = (
-            ('файлы XML', '*.xml'),
-            ('Все файлы', '*.*')
-        )
+        filetypes = (('файлы XML', '*.xml'), ('Все файлы', '*.*'))
+        filenames = fd.askopenfilenames(title='Выбрать файлы', filetypes=filetypes)
+        if len(filenames) == 0: return
+        self.start(filenames)
 
-        filenames = fd.askopenfilenames(
-            title='Выбрать файлы',
-            filetypes=filetypes)
+    def start(self, filenames):
         self.text.delete("1.0","end")
-        
-        for fname in filenames:
-            self.text.insert(tk.INSERT,os.path.basename(fname)+'\n')
+        for filename in filenames:
+            s = convert(filename)
+            if s == "":
+                self.text.insert(tk.INSERT,os.path.basename(filename)+' - неправильный формат файла\n')
+                #print(f'{filename} - неправильный формат файла')
+                continue
+            file = filename.split(sep='.')[0]
+            with open(file + '.xnc', 'w') as f:
+                f.write(s)
+            self.text.insert(tk.INSERT,os.path.basename(filename)+' - готово\n')
+            #print(f'{filename} - готово')
 
 MyApp()

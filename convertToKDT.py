@@ -1,12 +1,13 @@
 import xml.etree.ElementTree as ET
 from xmltag import XMLTag
 import math
+import os
 
-
-def convertToKDT(filename, name):
+def convertToKDT(filename):
     try:
         tree = ET.parse(filename)
-    except:
+    except Exception as e:
+        print(e)
         return ""
     root = tree.getroot()
     if root.tag != 'program':
@@ -21,6 +22,7 @@ def convertToKDT(filename, name):
     PanelLength = XMLTag(name="PanelLength").addChild(XMLTag(plain_text=length))
     PanelWidth = XMLTag(name="PanelWidth").addChild(XMLTag(plain_text=width))
     PanelThickness = XMLTag(name="PanelThickness").addChild(XMLTag(plain_text=thick))
+    name=os.path.basename(filename).split('.')[0]
     PanelName = XMLTag(name="PanelName").addChild(XMLTag(plain_text=name))
     Panel.addChild(PanelLength, PanelWidth, PanelThickness, PanelName)
     KDTPanelFormat.addChild(Panel)
@@ -51,13 +53,38 @@ def convertToKDT(filename, name):
                 y = float(el.attrib['y'])
                 cx = float(el.attrib['cx'])
                 cy = float(el.attrib['cy'])
-                x1 = XMLTag(name='X1').addChild(XMLTag(plain_text=el.attrib['x']))
-                y1 = XMLTag(name='Y1').addChild(XMLTag(plain_text=el.attrib['y']))
+                x1 = XMLTag(name='X1').addChild(XMLTag(plain_text=x))
+                y1 = XMLTag(name='Y1').addChild(XMLTag(plain_text=y))
                 radius = XMLTag(name='Radius').addChild(XMLTag(plain_text=math.sqrt((x-cx)**2 + (y-cy)**2)))
                 direction = XMLTag(name='Direction').addChild(XMLTag(plain_text=0 if el.attrib['dir'] == 'true' else 1))
                 arc.addChild(x1, y1, radius, direction)
                 vertexes.addChild(arc)
-                if root[elIndex+1].tag != 'mac':
+                if (elIndex == len(root) - 1) or (root[elIndex+1].tag != 'mac' and root[elIndex+1].tag != 'ma' and root[elIndex+1].tag != 'ml'):
+                    cad.addChild(vertexes)
+                    KDTPanelFormat.addChild(cad)
+            case 'ma':
+                arc = XMLTag(name='Arc')
+                x = float(el.attrib['x'])
+                y = float(el.attrib['y'])
+                r = float(el.attrib['r'])
+                x1 = XMLTag(name='X1').addChild(XMLTag(plain_text=x))
+                y1 = XMLTag(name='Y1').addChild(XMLTag(plain_text=y))
+                radius = XMLTag(name='Radius').addChild(XMLTag(plain_text = r))
+                direction = XMLTag(name='Direction').addChild(XMLTag(plain_text=0 if el.attrib['dir'] == 'true' else 1))
+                arc.addChild(x1, y1, radius, direction)
+                vertexes.addChild(arc)
+                if (elIndex == len(root) - 1) or root[elIndex+1].tag != 'mac' and root[elIndex+1].tag != 'ma' and root[elIndex+1].tag != 'ml':
+                    cad.addChild(vertexes)
+                    KDTPanelFormat.addChild(cad)
+            case 'ml':
+                line = XMLTag(name='Line')
+                x = float(el.attrib['x'])
+                y = float(el.attrib['y'])
+                x1 = XMLTag(name='X1').addChild(XMLTag(plain_text=x))
+                y1 = XMLTag(name='Y1').addChild(XMLTag(plain_text=y))
+                line.addChild(x1, y1)
+                vertexes.addChild(line)
+                if (elIndex == len(root) - 1) or root[elIndex+1].tag != 'mac' and root[elIndex+1].tag != 'ma' and root[elIndex+1].tag != 'ml':
                     cad.addChild(vertexes)
                     KDTPanelFormat.addChild(cad)
             case 'bf':

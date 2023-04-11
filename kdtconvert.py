@@ -5,7 +5,7 @@ from tkinter import filedialog as fd
 from tkinter.scrolledtext import ScrolledText
 from tkinter import Scrollbar
 
-from convert import convert
+from convertToXNC import convertToXNC
 from convertToKDT import convertToKDT
 
 class MyApp():
@@ -44,7 +44,7 @@ class MyApp():
         filenames = fd.askopenfilenames(title='Выбрать файлы',
                                         filetypes=filetypes)
         if len(filenames) == 0: return
-        self.start(filenames, convert, 'xnc')
+        self.start(filenames, convertToXNC, 'xnc')
 
     def select_file_xnc(self):
         filetypes = (('файлы XNC', '*.xnc'), ('Все файлы', '*.*'))
@@ -60,7 +60,7 @@ class MyApp():
     def start(self, filenames, func, ext):
         self.text.delete("1.0", "end")
         for filename in filenames:
-            s = func(filename, name=os.path.basename(filename).split('.')[0])
+            s = func(filename)
             if s == "":
                 self.text.insert(
                     tk.INSERT,

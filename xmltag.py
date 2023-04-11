@@ -13,6 +13,7 @@ class XMLTag():
         self.name = name
     def addAttribute(self, key, value):
         self.attributes[key] = value
+        return self
     def addChild(self, *child):
         for c in child: self.children.append(c)
         return self
